@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DrainWatch NYC</title>
+    <meta name="description" content="Live flood risk across New York City from tides, rainfall, NWS alerts and 311 reports." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 3C11 11 7 16 7 21a9 9 0 0 0 18 0c0-5-4-10-9-18z' fill='%231d6fb8'/></svg>" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C11 11 7 16 7 21a9 9 0 0 0 18 0c0-5-4-10-9-18z" /></svg>
+        <div>
+          <h1>DrainWatch</h1>
+          <p class="tagline">NYC environmental risk</p>
+        </div>
+      </div>
+      <nav class="hazards" aria-label="Hazards">
+        <button class="hazard active" aria-current="page">Floods</button>
+        <button class="hazard" disabled title="Coming soon">Heat</button>
+        <button class="hazard" disabled title="Coming soon">Air quality</button>
+        <button class="hazard" disabled title="Coming soon">Wind &amp; storms</button>
+      </nav>
+      <div class="refresh">
+        <span id="updated" class="muted">Loading…</span>
+        <button id="refresh-btn" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="card summary" id="summary">
+          <h2>Flood risk right now</h2>
+          <div id="summary-body" class="muted">Loading live data…</div>
+        </section>
+
+        <section class="card" id="alerts">
+          <h2>Weather alerts</h2>
+          <div id="alerts-body" class="muted">Loading…</div>
+        </section>
+
+        <section class="card">
+          <h2>Check an address</h2>
+          <form id="search-form" class="search" autocomplete="off">
+            <input id="search-input" type="search" placeholder="e.g. 160 Van Brunt St, Brooklyn" aria-label="NYC address" />
+            <button type="submit">Check</button>
+          </form>
+          <p class="hint">Or click anywhere on the map.</p>
+          <div id="search-results"></div>
+          <div id="point-result"></div>
+        </section>
+
+        <section class="card">
+          <h2>Coastal: tide &amp; storm surge</h2>
+          <label class="station-pick">
+            Station
+            <select id="station-select"></select>
+          </label>
+          <div id="tide-body" class="muted">Loading…</div>
+        </section>
+
+        <section class="card">
+          <h2>Stormwater: rainfall</h2>
+          <div id="rain-body" class="muted">Loading…</div>
+        </section>
+
+        <section class="card">
+          <h2>Neighborhoods</h2>
+          <ol id="area-list" class="area-list"></ol>
+        </section>
+
+        <section class="card">
+          <h2>Climate outlook</h2>
+          <p>
+            Sea level in New York Harbor has risen <strong>more than a foot since 1900</strong>, and the rise is speeding up.
+            Higher seas mean today's "nuisance" high tides become regular flooding, and storm surges reach farther inland.
+            Heavier downpours, like Ida's 3.15 in/hr in Central Park (2021), already exceed what most sewers can drain.
+          </p>
+          <table class="slr">
+            <caption>Projected sea level rise, NYC (inches, vs. 2000–04)</caption>
+            <thead>
+              <tr><th>Period</th><th>Likely range</th><th>High-end</th></tr>
+            </thead>
+            <tbody id="slr-body"></tbody>
+          </table>
+          <p class="source">Source: NYC Panel on Climate Change (NPCC 2015, 2019).</p>
+        </section>
+
+        <section class="card">
+          <h2>About the data</h2>
+          <ul id="source-status" class="sources"></ul>
+          <details>
+            <summary>How the risk level is calculated</summary>
+            <p>
+              Each place gets a <strong>coastal</strong> and a <strong>stormwater</strong> score. Live conditions
+              (predicted tide plus current storm surge vs. NOAA flood thresholds; forecast rain intensity vs. NYC sewer
+              capacity) are rated 0–4, then scaled by how exposed the place is (0–3). The higher of the two wins. Active NWS
+              flood alerts and recent 311 flooding reports nearby raise the score.
+            </p>
+            <p>
+              Neighborhood exposure ratings are simplified from FEMA flood maps and NYC DEP stormwater maps. Address checks
+              ask FEMA for the actual flood zone, and use a year of 311 flooding reports as a stand-in for stormwater
+              exposure.
+            </p>
+            <p><strong>This is an informational tool, not an official warning.</strong> Follow <a href="https://www.nyc.gov/notifynyc" target="_blank" rel="noopener">Notify NYC</a> and the <a href="https://www.weather.gov/okx/" target="_blank" rel="noopener">National Weather Service</a> in an emergency.</p>
+          </details>
+        </section>
+      </aside>
+
+      <div class="map-wrap">
+        <div id="map" role="region" aria-label="Flood risk map"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
