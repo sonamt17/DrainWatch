@@ -1,0 +1,86 @@
+
+(map tiles: js/page/map.js)
+
+
+LIVE APIS (called while the site runs)
+--------------------------------------
+
+1. NOAA Tides & Currents  (US government)
+   Used for: water level now, tide forecast, storm surge
+   https://api.tidesandcurrents.noaa.gov/api/prod/datagetter
+   Docs: https://api.tidesandcurrents.noaa.gov/api/prod/
+   Code: fetchTides()
+
+2. Open-Meteo Forecast  (Swiss nonprofit)
+   Used for: rain, temperature, humidity, wind, gusts, thunderstorms
+   https://api.open-meteo.com/v1/forecast
+   Docs: https://open-meteo.com/en/docs
+   Code: fetchWeather()
+
+3. Open-Meteo Air Quality  (Swiss nonprofit)
+   Used for: air quality index (AQI), smoke (PM2.5), ozone
+   https://air-quality-api.open-meteo.com/v1/air-quality
+   Docs: https://open-meteo.com/en/docs/air-quality-api
+   Code: fetchAirQuality()
+
+4. National Weather Service Alerts  (US government)
+   Used for: active warnings, watches and advisories for NYC
+   https://api.weather.gov/alerts/active?area=NY
+   Docs: https://www.weather.gov/documentation/services-web-api
+   Code: fetchAlerts()
+
+5. NYC Open Data - 311 Service Requests  (NYC government)
+   Used for: street flooding / sewer backup complaints
+   https://data.cityofnewyork.us/resource/erm2-nwe9.json
+   Docs: https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9
+   Code: fetchRecent311(), fetch311History()
+
+6. NYC Open Data - Hurricane Evacuation Zones  (NYC Emergency Management)
+   Used for: the evacuation zone (1-6) of a checked address
+   https://data.cityofnewyork.us/resource/epne-qv9x.json
+   Docs: https://data.cityofnewyork.us/d/epne-qv9x
+   Code: fetchEvacZone()
+
+7. NYC GeoSearch  (NYC Planning Labs)
+   Used for: address -> latitude/longitude, and clicked point -> address
+   https://geosearch.planninglabs.nyc/v2/search
+   https://geosearch.planninglabs.nyc/v2/reverse
+   Docs: https://geosearch.planninglabs.nyc/
+   Code: geocode(), reverseGeocode()
+
+8. FEMA National Flood Hazard Layer  (US government)
+   Used for: official flood zone at an address, and the flood-zone map layer
+   https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query
+   https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/export
+   Docs: https://hazards.fema.gov/femaportal/wps/portal/NFHLWMS
+   Code: fetchFemaZone(), makeFemaLayer()
+
+9. OpenStreetMap tiles  (OpenStreetMap volunteers)
+   Used for: the map background pictures
+   https://tile.openstreetmap.org/{z}/{x}/{y}.png
+   Backup: https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png
+   Docs: https://www.openstreetmap.org/copyright
+   Code: addBasemap()
+
+
+DATA FILES (made once, saved in data/)
+--------------------------------------
+
+10. data/nyc-ntas.geojson - the 195 neighborhood shapes
+    From: NYC Department of City Planning, via the NYC Health Department
+    https://github.com/nycehs/NYC_geography
+    Made by: scripts/build/build-geodata.mjs
+
+11. data/nyc-elevation.png - ground height for all of NYC, stored as pixel colors
+    From: AWS Terrain Tiles (USGS 3D Elevation Program)
+    https://registry.opendata.aws/terrain-tiles/
+    Made by: scripts/build/bake-elevation.mjs
+
+
+NUMBERS TYPED IN BY HAND (no API)
+---------------------------------
+- Neighborhood ratings in js/facts/config.js: simplified from FEMA flood maps,
+  NYC DEP stormwater maps, the NYC Heat Vulnerability Index and the
+  NYC Environment & Health Data Portal (https://a816-dohbesp.nyc.gov/IndicatorPublic/)
+- Sea level rise projections: NYC Panel on Climate Change (NPCC 2015, 2019)
+- Historical replays in js/models/scenarios.js: rebuilt from NOAA, NWS and EPA records

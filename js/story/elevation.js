@@ -1,0 +1,14 @@
+// Source: https://registry.opendata.aws/terrain-tiles/ (AWS Terrain Tiles, from USGS elevation data)
+// Shared description of data/nyc-elevation.png (made by scripts/build/bake-elevation.mjs).
+//   elevation_m = (R * 256 + G) / 100 - 100
+//   B = 1 + neighborhood (NTA) index, or 0 for water / outside the city
+
+export const ELEVATION = {
+  url: 'data/nyc-elevation.png',
+  bbox: { west: -74.27, east: -73.68, south: 40.48, north: 40.93 },
+  size: 448,
+};
+
+export function decodeElevation(r, g) {
+  return (r * 256 + g) / 100 - 100;
+}

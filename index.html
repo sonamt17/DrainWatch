@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>DrainWatch</title>
+    <link rel="icon" href="favicon.svg" />
+    <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-hazard="floods">
+    <a class="skip-link" href="#address-card">Skip to the address check</a>
+
+    <header class="top-bar">
+      <a class="logo" href="#dashboard">DrainWatch</a>
+      <nav class="hazard-menu">
+        <a href="#floods" data-hazard="floods" class="selected">Floods</a>
+        <a href="#heat" data-hazard="heat">Heat</a>
+        <a href="#air" data-hazard="air">Air</a>
+        <a href="#wind" data-hazard="wind">Wind</a>
+      </nav>
+      <div class="top-bar-buttons">
+        <button type="button" class="pill-button" id="compare-button">Compare</button>
+        <button type="button" class="pill-button dark-fill" id="story-button">Story</button>
+        <button type="button" class="theme-toggle" id="theme-toggle">Dark</button>
+      </div>
+    </header>
+
+    <main class="dashboard" id="dashboard">
+      <!-- Right now: the one number that matters, in plain words -->
+      <section class="card colored-top-border">
+        <p class="small-label" id="now-label">Right now - Floods</p>
+        <div class="number-row">
+          <p class="big-number huge-text" id="now-number"><span class="number-digits">—</span><span class="number-unit"></span></p>
+          <p class="number-label" id="now-number-label"></p>
+        </div>
+        <h1 class="serif-heading" id="now-headline">Checking conditions across the city…</h1>
+        <p class="intro-text" id="now-summary"></p>
+        <p class="note space-above" id="now-replay-note"></p>
+        <p class="other-hazards" id="now-other-hazards" hidden></p>
+        <button type="button" class="story-teaser" id="story-teaser">
+          <span class="small-label" id="story-teaser-label">Story</span>
+          <span class="story-teaser-number" id="story-teaser-number"></span>
+          <span class="story-teaser-headline" id="story-teaser-headline"></span>
+          <span class="story-teaser-play">Play the story ▶</span>
+        </button>
+      </section>
+
+      <!-- Address check: risk for one address, its evacuation zone and the nearest higher ground -->
+      <section class="card" id="address-card">
+        <form class="address-form" id="address-form">
+          <label class="card-title" id="address-card-title" for="address-input">Check an address</label>
+          <p class="note">Risk for all four hazards, the official evacuation zone, and the nearest higher ground.</p>
+          <div class="address-row">
+            <input id="address-input" type="search" />
+            <button type="submit">Check</button>
+          </div>
+          <div class="address-results" id="address-results"></div>
+          <p class="note smaller-text">Or click anywhere on the map.</p>
+        </form>
+        <div id="address-report" class="address-report-box"></div>
+      </section>
+
+      <!-- The map: after the first two cards in the page (and Tab) order, so the address check comes
+           before the map's controls; on wide screens the grid pins it in the left column. -->
+      <section class="dash-map">
+        <div class="map-shell">
+          <div class="map" id="map"></div>
+          <div class="map-stack">
+            <p class="floating dark-fill" id="tm-badge" hidden></p>
+            <details class="floating layers-box" id="layers-box" open hidden>
+              <summary class="small-label">Map layers</summary>
+              <fieldset class="layers" id="layers">
+                <legend class="sr-only">Map layers</legend>
+              </fieldset>
+            </details>
+          </div>
+          <div class="floating map-legend" id="legend"></div>
+        </div>
+      </section>
+
+      <!-- Climate Time Machine: replays and sea level rise -->
+      <section class="card" id="time-machine">
+        <div class="card-head">
+          <h2 class="card-title" id="tm-title">Climate Time Machine</h2>
+        </div>
+        <div class="modes">
+          <p class="small-label" id="mode-label">Conditions</p>
+          <div class="mode-list" id="mode-list"></div>
+        </div>
+        <div class="slr" id="slr" hidden>
+          <div class="slr-top">
+            <label class="small-label" for="slr-range">Sea level rise</label>
+            <output class="slr-out" id="slr-out" for="slr-range">+0 in</output>
+          </div>
+          <input type="range" id="slr-range" min="0" max="75" step="1" value="0" />
+          <div class="slr-stops" id="slr-stops"></div>
+          <p class="note" id="slr-note"></p>
+        </div>
+        <div class="tm-delta" id="tm-delta"></div>
+      </section>
+
+      <!-- Explore: tabs instead of long sections -->
+      <section class="card less-padding-top" id="explore">
+        <div class="tabs" id="explore-tabs">
+          <button type="button" id="tab-ranking" class="selected" data-tab="ranking">Neighborhoods</button>
+          <button type="button" id="tab-forecast" tabindex="-1" data-tab="forecast">Forecast &amp; alerts</button>
+          <button type="button" id="tab-ready" tabindex="-1" data-tab="ready">Be ready</button>
+        </div>
+
+        <div class="tab-panel" id="panel-ranking">
+          <p class="note" id="ranking-note"></p>
+          <table class="table" id="ranking">
+            <thead>
+              <tr><th scope="col" class="num">#</th><th scope="col">Neighborhood</th><th scope="col">Risk</th><th scope="col" class="num">Score</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button type="button" class="more" id="ranking-more">Show all neighborhoods</button>
+        </div>
+
+        <div class="tab-panel forecast-panel" id="panel-forecast" hidden>
+          <div id="details"></div>
+        </div>
+
+        <div class="tab-panel" id="panel-ready" hidden>
+          <p class="note">Small steps that save lives in New York's most common disasters. Check off what you've done; it stays in this browser only.</p>
+          <p class="progress" id="prep-progress"></p>
+          <div class="prep-nav" id="prep-tabs"></div>
+          <ul class="checklist" id="checklist"></ul>
+        </div>
+      </section>
+    </main>
+
+    <section class="method" id="method">
+      <div class="method-intro">
+        <p class="small-label">How it works</p>
+        <h2 class="serif-heading" id="method-title">Public data in, a plain-language risk level out</h2>
+        <p class="intro-text">
+          Every 15 minutes DrainWatch reads tide gauges, forecasts, weather alerts and 311 reports from free government and open-data sources. No API keys, no tracking.
+          For each hazard, a short, tested set of rules scores <em>how bad conditions will get</em> and scales it by <em>how exposed each neighborhood is</em>.
+        </p>
+        <p class="formula">risk = hazard (0–4) × exposure + alerts</p>
+      </div>
+      <div class="method-grid">
+        <div class="method-card">
+          <h3 class="card-title">The four models</h3>
+          <div id="methodology" class="method-list"></div>
+        </div>
+        <div class="method-card">
+          <h3 class="card-title">Sea level rise, projected for New York</h3>
+          <table class="table">
+            <thead><tr><th>Period</th><th>Likely range</th><th>High-end</th></tr></thead>
+            <tbody id="slr-body"></tbody>
+          </table>
+          <p class="note">Inches above the 2000–2004 average. Likely range: 25th–75th percentile. High-end: 90th percentile. Source: NYC Panel on Climate Change, 2019.</p>
+        </div>
+        <div class="method-card">
+          <h3 class="card-title">Sources</h3>
+          <ul class="sources" id="sources"></ul>
+          <details class="story-data">
+            <summary>The replay's numbers, hour by hour</summary>
+            <div id="story-table"></div>
+          </details>
+        </div>
+      </div>
+      <p class="disclaimer">
+        <strong>DrainWatch is an educational tool, not an official warning system.</strong> In an emergency follow
+        <a href="https://www.nyc.gov/notifynyc" target="_blank" rel="noopener">Notify NYC</a> and the
+        <a href="https://www.weather.gov/okx/" target="_blank" rel="noopener">National Weather Service</a>, and call 911 if you are in danger.
+      </p>
+    </section>
+
+    <footer class="footer">
+      <p class="logo">DrainWatch</p>
+      <p>Built for New Yorkers, for the Congressional App Challenge. Data from NOAA, the National Weather Service, Open-Meteo, NYC Open Data, FEMA, USGS and the NYC Health Department.
+        Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. <a href="https://github.com/sonamt17/DrainWatch" target="_blank" rel="noopener">Source code</a>.</p>
+    </footer>
+
+    <!-- The story: full screen, text on the left and a map on the right. Stepped with the buttons, the slider or the arrow keys. -->
+    <div class="story" id="story" hidden>
+      <div class="story-map" id="story-map"></div>
+
+      <div class="story-side" data-chapter="timeline" id="story-side">
+        <div class="story-top">
+          <p class="small-label" id="story-title">The story</p>
+          <button type="button" class="story-close" id="story-close">Close ✕</button>
+        </div>
+        <div class="chapter-tabs">
+          <button type="button" data-chapter="timeline" class="selected">1 · The timeline</button>
+          <button type="button" data-chapter="exposed" tabindex="-1">2 · Who's exposed</button>
+        </div>
+
+        <div class="chapter chapter-timeline">
+          <p class="small-label" id="timeline-kicker">Hurricane Sandy · October 29, 2012</p>
+          <h2 class="serif-heading" id="timeline-title">The harbor rose all day, then poured into the city</h2>
+          <p class="intro-text" id="timeline-dek"></p>
+          <p class="replay-note" id="timeline-note"></p>
+          <p class="clock"><span id="clock-time">Monday, 6 a.m.</span></p>
+          <p class="readout"><span class="readout-num" id="readout-num">—</span><span class="readout-unit" id="readout-unit"></span></p>
+          <ol class="beats" id="beats"></ol>
+          <p class="note story-legend" id="story-legend"></p>
+        </div>
+
+        <div class="chapter chapter-exposed">
+          <p class="small-label" id="exposed-kicker">Who's exposed</p>
+          <h2 class="serif-heading" id="exposed-title">Where the water reached first</h2>
+          <p class="intro-text" id="exposed-dek"></p>
+          <ol class="stops" id="stops"></ol>
+          <p class="modeled" id="exposed-note"></p>
+        </div>
+
+        <div class="player">
+          <button type="button" class="player-btn" id="story-prev">◀</button>
+          <button type="button" class="player-btn dark-fill" id="story-play">▶ Play</button>
+          <button type="button" class="player-btn" id="story-next">▶</button>
+          <input type="range" class="player-range" id="story-range" min="0" max="1" step="1" value="0" />
+          <p class="player-hint">← → to step · space to play · Esc to close</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Neighborhood vs. neighborhood -->
+    <dialog class="compare" id="compare">
+      <form method="dialog" class="compare-inner">
+        <div class="compare-head">
+          <div>
+            <p class="small-label" id="compare-mode">Live now</p>
+            <h2 class="serif-heading" id="compare-title">Neighborhood vs. neighborhood</h2>
+          </div>
+          <button class="story-close" value="close">Close ✕</button>
+        </div>
+        <div class="compare-pick">
+          <label><span class="small-label">A</span><select id="compare-a"></select></label>
+          <button type="button" class="swap" id="compare-swap">⇄</button>
+          <label><span class="small-label">B</span><select id="compare-b"></select></label>
+        </div>
+        <div class="compare-presets" id="compare-presets"></div>
+        <div class="compare-body" id="compare-body"></div>
+        <div class="compare-foot">
+          <button type="button" class="btn" id="compare-map">Show both on the map</button>
+        </div>
+      </form>
+    </dialog>
+
+
+    <script src="vendor/leaflet/leaflet.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

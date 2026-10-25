@@ -1,0 +1,630 @@
+kind,current name,MY NAME (fill in),what it is,where it is defined,times it appears,rename notes
+file,index.html,,"The page itself: every box, button and section. JS fills the empty boxes.",,,Renaming or moving it means updating every import of it.
+file,css/style.css,,"All the styling: colors, fonts, layout, light/dark themes, phone layout.",,,Renaming or moving it means updating every import of it.
+file,js/app.js,,"The entry point: holds state, loads live data, handles every click, and redraws the page.",,,Renaming or moving it means updating every import of it.
+file,js/facts/config.js,,"The 39 rated neighborhoods with their ratings, the tide gauges, sea level projections.",,,Renaming or moving it means updating every import of it.
+file,js/facts/content.js,,Plain words: the Be ready checklist and the methodology notes.,,,Renaming or moving it means updating every import of it.
+file,js/apis/data.js,,"Every call to an outside API, plus pure functions that summarize the answers.",,,Renaming or moving it means updating every import of it.
+file,js/models/risk.js,,"The flood risk model, plus shared helpers (LEVELS, clamp, round2) the other models use.",,,Renaming or moving it means updating every import of it.
+file,js/models/heat-risk.js,,The heat risk model (heat index × Heat Vulnerability Index).,,,Renaming or moving it means updating every import of it.
+file,js/models/air-risk.js,,The air quality risk model (AQI × asthma burden).,,,Renaming or moving it means updating every import of it.
+file,js/models/storm-risk.js,,The wind & storm risk model (gusts × wind exposure).,,,Renaming or moving it means updating every import of it.
+file,js/models/hazards.js,,Runs the right model for a hazard across all 39 neighborhoods; writes the headline and stat tiles.,,,Renaming or moving it means updating every import of it.
+file,js/models/scenarios.js,,"The historical replays (Sandy, Ida…) rebuilt as fake API data, and sea level rise.",,,Renaming or moving it means updating every import of it.
+file,js/models/terrain.js,,"Ground elevation: nearest higher ground, neighborhood elevation, flooded land.",,,Renaming or moving it means updating every import of it.
+file,js/page/map.js,,"The Leaflet map: basemap, neighborhood shapes, layers, markers, routes.",,,Renaming or moving it means updating every import of it.
+file,js/page/panels.js,,"Functions that turn data into HTML for the cards, table, address report, Compare and popups.",,,Renaming or moving it means updating every import of it.
+file,js/page/sections.js,,"The sections under the dashboard: checklist (saved in the browser), methodology, sources, sea level chart.",,,Renaming or moving it means updating every import of it.
+file,js/page/ui.js,,"Tiny shared HTML helpers (esc, level, fmtTime).",,,Renaming or moving it means updating every import of it.
+file,js/story/stories.js,,"The four 3D stories: which replay, the text beats, the neighborhoods visited.",,,Renaming or moving it means updating every import of it.
+file,js/story/controller.js,,"Runs the story player: scrubber position → camera, hour and text.",,,Renaming or moving it means updating every import of it.
+file,js/story/geo.js,,"Map math: projection, point-in-shape, distance, blending values.",,,Renaming or moving it means updating every import of it.
+file,js/story/elevation.js,,How to read the elevation PNG (pixel color → meters).,,,Renaming or moving it means updating every import of it.
+constant,NY_TZ,,"The time zone name 'America/New_York', passed to APIs and date formatting.",js/apis/data.js:18,4,
+constant,FLOOD_311_WHERE,,The 311 filter: Sewer complaints that mention flooding or backups.,js/apis/data.js:19,3,
+constant,FEMA_NFHL,,Base URL of FEMA's flood map server.,js/apis/data.js:21,4,Exported: used in other files too.
+constant,FEMA_FLOOD_ZONE_LAYER,,Layer number 28 on FEMA's server = flood zones.,js/apis/data.js:22,4,Exported: used in other files too.
+function,fetchJson,,"fetch() + .json() with a 20 s timeout; throws on any error (404, 500…). Every API call uses it.",js/apis/data.js:24,12,
+function,nyParts,,Date parts in New York local time.,js/apis/data.js:37,4,
+function,nyHourKey,,"""2026-09-28T14:00"" style local timestamp, used to line up Open-Meteo hours.",js/apis/data.js:52,3,Exported: used in other files too. Tests use it.
+function,noaaMinutes,,"Parse NOAA's ""2026-09-28 14:06"" local string into minutes for comparisons.",js/apis/data.js:58,3,
+constant,NOAA,,Base URL of NOAA's tides API.,js/apis/data.js:64,21,
+function,noaaUrl,,Builds a NOAA tides URL for one station with the shared settings.,js/apis/data.js:66,3,
+function,fetchTides,,Latest observed water level and the next 48 h of predicted tides for a station.,js/apis/data.js:83,4,Exported: used in other files too. Tests use it.
+constant,WEATHER_VARS,,"Which hourly numbers to ask Open-Meteo for (rain, temp, humidity, wind, gusts, weather code).",js/apis/data.js:130,2,
+function,hourIndex,,"Index of the current hour in an hourly time axis (""2026-09-28T14:00"" strings).",js/apis/data.js:133,4,Exported: used in other files too. Tests use it.
+function,maxBy,,Finds the row with the biggest value for one key (e.g. the rainiest hour).,js/apis/data.js:140,7,
+function,summarizeWeather,,"Boil an Open-Meteo hourly block down to what the risk models need for the next 48 hours: rain (peak rate, totals), heat (peak heat index, overnight low) and wind (peak gust and sus",js/apis/data.js:151,4,Exported: used in other files too. Tests use it.
+function,fetchWeather,,"Next 48 h of weather for many points in one request, one summary per point.",js/apis/data.js:199,4,Exported: used in other files too. Tests use it.
+constant,AIR_VARS,,"Which hourly numbers to ask the air quality API for (AQI, PM2.5, ozone).",js/apis/data.js:219,2,
+function,summarizeAir,,"Current and peak US AQI over the next 48 h, plus which pollutant drives it.",js/apis/data.js:222,4,Exported: used in other files too. Tests use it.
+function,fetchAirQuality,,"Air quality forecast for many points in one request, one summary per point.",js/apis/data.js:246,3,Exported: used in other files too. Tests use it.
+function,fetchAlerts,,Active NWS alerts that cover at least one NYC borough.,js/apis/data.js:265,3,Exported: used in other files too. Tests use it.
+function,parseAlerts,,"Keeps only NWS alerts that cover an NYC borough; returns {event, headline, ends, boroughs}.",js/apis/data.js:272,2,Exported: used in other files too. Tests use it.
+constant,SOCRATA_311,,URL of NYC's 311 dataset on NYC Open Data.,js/apis/data.js:288,3,
+function,socrataHeaders,,"Adds the optional NYC Open Data app token header, if one is set.",js/apis/data.js:290,4,
+function,socrataDaysAgo,,"Socrata ""floating timestamp"" in NY local time, e.g.",js/apis/data.js:295,3,
+function,fetchRecent311,,311 flooding reports citywide in the last `days` days.,js/apis/data.js:301,3,Exported: used in other files too.
+function,fetch311History,,Count of 311 flooding reports within `meters` of a point over the past year.,js/apis/data.js:321,3,Exported: used in other files too.
+function,geocode,,Address text → up to 5 matching NYC addresses with lat/lon (NYC GeoSearch).,js/apis/data.js:332,5,Exported: used in other files too. Tests use it.
+constant,STREET_WORDS,,Street words people abbreviate; both sides are normalized to the long form.,js/apis/data.js:344,2,
+constant,BOROUGH_WORDS,,Nicknames for boroughs people type (bk → brooklyn) for address matching.,js/apis/data.js:348,2,
+function,norm,,"Lower-cases an address and expands ""st""→""street"" etc. so two spellings can be compared.",js/apis/data.js:349,5,
+function,isExactAddress,,Is a GeoSearch result exactly what the reader typed?,js/apis/data.js:365,3,Exported: used in other files too. Tests use it.
+function,reverseGeocode,,"Nearest address label for a point, or null.",js/apis/data.js:376,3,Exported: used in other files too.
+function,fetchFemaZone,,"FEMA National Flood Hazard Layer zone at a point, e.g.",js/apis/data.js:386,3,Exported: used in other files too.
+function,round2,,Rounds a number to 2 decimals.,js/apis/data.js:404,15,
+constant,EVAC_ZONES,,"NYC Emergency Management's hurricane evacuation zones on NYC Open Data (no key): dataset epne-qv9x, zone in the `hurricane_` column, polygons in `the_geom`.",js/apis/data.js:415,3,Exported: used in other files too.
+constant,EVAC_ZONE_FINDER,,Link to NYC's official evacuation zone finder.,js/apis/data.js:416,4,Exported: used in other files too.
+function,parseEvacZone,,"{ zone: '1'…'6' } inside a zone, { zone: null } outside every zone.",js/apis/data.js:419,2,Exported: used in other files too. Tests use it.
+function,fetchEvacZone,,Asks NYC Open Data which hurricane evacuation zone (1–6) a point is in.,js/apis/data.js:428,3,Exported: used in other files too. Tests use it.
+constant,REFRESH_MS,,"How often live data reloads: 15 minutes, in milliseconds.",js/app.js:52,2,
+constant,INCH_M,,Meters in one inch (0.0254).,js/app.js:53,4,
+constant,SOURCES,,"Names and links of every data source, for the About-the-data list.",js/app.js:55,5,
+constant,COMPARE_PRESETS,,Pairs of neighborhoods offered as one-click Compare examples.,js/app.js:67,2,
+constant,state,,"THE object holding everything the page shows: hazard, replay, sea level, live data, address check…",js/app.js:74,206,
+constant,scenarioCache,,Remembers replays already built so they are not rebuilt on every redraw.,js/app.js:91,4,
+function,$,,Shortcut for document.getElementById.,js/app.js:92,777,"Very short name: rename by hand, not find-and-replace."
+function,isLive,,True when showing live data (not a replay).,js/app.js:94,20,
+function,reducedMotion,,True if the user asked their computer for less animation.,js/app.js:95,6,
+function,narrow,,True on narrow (phone-sized) screens.,js/app.js:96,8,
+constant,terrain,,The elevation grid once data/nyc-elevation.png has loaded (null before).,js/app.js:98,39,
+constant,ntaFeatures,,The 195 neighborhood shapes once the GeoJSON has loaded.,js/app.js:99,8,
+function,baseInputs,,"The data to show right now: live data, or the chosen replay (built once, then cached).",js/app.js:103,4,
+function,inputsFor,,Sea level rise only ever applies to the flood model.,js/app.js:110,6,
+function,liveSummary,,"Citywide summary of live data for one hazard (used for ""Also right now"").",js/app.js:116,2,
+function,headlineNumber,,"Picks the one big number for the Right now card (e.g. highest water level, peak heat index).",js/app.js:123,2,
+function,riskTitle,,"""Severe flood risk in 13 neighborhoods"", or ""… across the city"" when it is everywhere.",js/app.js:150,2,
+function,setMega,,Writes the big headline number and its unit.,js/app.js:158,2,
+constant,stories,,"Cache of built 3D stories, one per hazard.",js/app.js:163,9,
+function,storyFor,,Gets (or builds once) the 3D story for a hazard.,js/app.js:164,4,
+function,renderApp,,"THE redraw function: rebuilds every card, the table and the map from state.",js/app.js:171,15,
+function,renderAlsoLine,,"Lead with whatever is dangerous today, even on another hazard's tab.",js/app.js:218,2,
+function,renderStoryCta,,"The story teaser: the replay's one big number and headline, and a way in.",js/app.js:229,2,
+function,renderModes,,Draws the Live now / replay buttons in the Time Machine.,js/app.js:236,2,
+function,slrLabel,,"Inches of sea level rise → text like ""+29 in (2080s)"".",js/app.js:245,2,
+function,timeMachineDelta,,"What the sea level rise changes, compared with the same conditions at today's sea level.",js/app.js:253,2,
+constant,WETTER_SHARE,,"A neighborhood counts as ""hit harder"" if extra sea level floods ≥5% more of its land.",js/app.js:283,2,
+function,landDelta,,Rated neighborhoods ranked by how much more of their land the extra rise puts under water.,js/app.js:286,2,
+function,floodLevels,,"Water levels for the flooded-land layer: the Battery's peak, without and with the extra rise.",js/app.js:306,3,
+function,renderTimeMachine,,"Draws the sea level slider label and the ""what changed"" card.",js/app.js:313,2,
+function,renderMapData,,Colors the map neighborhoods and redraws its layers for the current results.,js/app.js:341,2,
+function,floodColors,,"Flooded-land colors: slate (the theme's --flood-base) for land under water at today's sea level, so it never reads as part of the blue risk ramp, and orange for land that only the ",js/app.js:375,2,
+function,renderLayers,,Draws the map layer checkboxes.,js/app.js:381,3,
+function,readHash,,"#heat, #floods/sandy, #floods/sandy/2080s, #floods/live/40in: shareable links into a view.",js/app.js:405,3,
+constant,hashTimer,,debounced: dragging the sea level slider would otherwise rewrite the URL on every frame,js/app.js:417,3,
+function,writeHash,,"Saves the current view into the URL (#floods/sandy/2080s), a moment after changes stop.",js/app.js:418,2,
+function,setHazard,,Switches the page to another hazard tab.,js/app.js:429,11,
+function,track,,Runs one data fetch and records in state.status whether it worked; returns null on failure.,js/app.js:446,8,
+function,loadLive,,"Fetches all live data at once (Promise.all), stores it in state, redraws.",js/app.js:458,3,
+constant,pointRequest,,Counter so a slow old address check cannot overwrite a newer one.,js/app.js:492,5,
+constant,SANDY_PEAK_FT,,"Sandy's storm tide at the Battery, and the same storm on 2080s seas: the yardsticks for ""ground here"".",js/app.js:495,3,
+constant,FUTURE_STOP,,"The 2080s sea level step, used for ""Sandy plus 2080s seas"" at an address.",js/app.js:496,6,
+function,checkPoint,,"The address check: geocode result → FEMA, 311, weather, evac zone, elevation → report.",js/app.js:498,4,
+function,pointTerrain,,"Elevation here, Sandy's yardsticks, and the nearest higher ground (cached per address).",js/app.js:535,2,
+function,pointReport,,Builds the data for the address report card from state.point.,js/app.js:551,2,
+function,renderPoint,,Draws (or hides) the address report.,js/app.js:586,6,
+function,wireSearch,,"Hooks up the address form: submit, suggestions, exact-match handling.",js/app.js:590,2,
+function,areaElevation,,A neighborhood's typical elevation and how much sits below Sandy's water (for Compare).,js/app.js:633,2,
+function,compareSide,,Gathers one side of Compare: every hazard risk + facts for one neighborhood.,js/app.js:646,3,
+function,renderCompare,,Draws the Compare dialog contents.,js/app.js:659,7,
+function,openCompare,,Opens the Compare dialog with two neighborhoods.,js/app.js:680,2,
+constant,lastFocus,,"The element that had keyboard focus before the story opened, to return to it.",js/app.js:695,3,
+function,openStory,,Opens the full-screen 3D story.,js/app.js:729,3,
+function,closeStory,,Closes the 3D story and returns focus to where you were.,js/app.js:738,3,
+function,onStoryPosition,,"Called as the story moves: updates the scrubber, chapter tabs and Play button.",js/app.js:745,2,
+function,selectTab,,Switches the Neighborhoods / Forecast / Be ready tabs.,js/app.js:760,4,
+constant,slrFrame,,"the sea level slider redraws on every frame it moves, at most once per frame",js/app.js:789,4,
+function,showArea,,Shows one neighborhood: scrolls/flies the map to it and opens its popup.,js/app.js:836,3,
+function,effectiveTheme,,theme: the button names the theme you'd switch to.,js/app.js:956,6,
+function,syncThemeButton,,"Makes the theme button say ""Dark"" or ""Light"" correctly.",js/app.js:959,4,
+function,markHazard,,Marks the current hazard on <body> (colors) and in the masthead links.,js/app.js:984,3,
+constant,story,,"The 3D story controller object (open, close, play…).",js/app.js:998,205,
+constant,checklist,,The Be ready checklist controller.,js/app.js:1009,11,
+constant,resizeTimer,,Timer used to wait until window resizing stops.,js/app.js:1025,3,
+constant,NYC_OPEN_DATA_APP_TOKEN,,"Optional: a free NYC Open Data ""app token"" raises the 311 rate limit.",js/facts/config.js:15,4,Exported: used in other files too.
+constant,TIDE_STATIONS,,NOAA tide stations. greatDiurnalRangeFt = MHHW − MLLW (approximate).,js/facts/config.js:23,16,Exported: used in other files too.
+constant,AREAS,,"THE list of 39 rated neighborhoods: id, name, borough, lat/lon, 5 ratings, tide station.",js/facts/config.js:30,50,Exported: used in other files too. Tests use it.
+constant,BOROUGH_SAME,,SAME (FIPS) county codes that NWS alerts use for each borough.,js/facts/config.js:78,3,Exported: used in other files too.
+constant,RAIN_BENCHMARKS,,"NYC DEP rainfall benchmarks, inches per hour.",js/facts/config.js:87,6,Exported: used in other files too.
+constant,SEA_LEVEL_PROJECTIONS,,"Sea level rise projections for NYC, inches above the 2000–2004 baseline (NPCC 2015/2019).",js/facts/config.js:96,11,Exported: used in other files too.
+constant,CHECKLIST,,"Words, not logic: the preparedness checklist and the methodology notes.",js/facts/content.js:4,6,Exported: used in other files too.
+constant,METHODOLOGY,,"The ""how it works"" text for each hazard.",js/facts/content.js:144,4,Exported: used in other files too.
+constant,AQI_CATEGORIES,,"EPA AQI bands: Good, Moderate, Unhealthy for sensitive groups, … with their ranges.",js/models/air-risk.js:9,2,Exported: used in other files too.
+function,aqiCategory,,AQI number → its EPA category (e.g. 160 → Unhealthy).,js/models/air-risk.js:18,15,Exported: used in other files too. Tests use it.
+constant,PM25_BREAKPOINTS,,"EPA PM2.5 breakpoints (µg/m³, 24-hour), as revised in 2024.",js/models/air-risk.js:24,2,
+function,aqiFromPm25,,"US AQI for a PM2.5 concentration, using the EPA's piecewise-linear formula.",js/models/air-risk.js:34,4,Exported: used in other files too. Tests use it.
+function,aqiHazard,,0–4 hazard from the peak AQI.,js/models/air-risk.js:44,2,Exported: used in other files too. Tests use it.
+function,classifyAirAlert,,"{ severity } for air-related NWS alerts, otherwise null.",js/models/air-risk.js:54,3,Exported: used in other files too. Tests use it.
+constant,POLLUTANT_NAMES,,Plain-English names for pm2_5 and ozone.,js/models/air-risk.js:59,3,
+function,assessAir,,"input: { asthma, currentAqi, peakAqi, dominant: 'pm2_5' | 'ozone', alerts: [{ event, severity }] }",js/models/air-risk.js:64,3,Exported: used in other files too. Tests use it.
+constant,HAZARD_ORDER,,"The four hazards in tab order: ['floods','heat','air','wind'].",js/models/hazards.js:13,19,Exported: used in other files too.
+constant,HAZARDS,,"Display names for each hazard (label, title, noun).",js/models/hazards.js:15,13,Exported: used in other files too.
+constant,CLASSIFIERS,,Which alert-sorting function each hazard uses.,js/models/hazards.js:22,2,
+constant,NEARBY_KM,,"311 reports within this many km (1) count as ""nearby"".",js/models/hazards.js:24,2,
+function,alertsFor,,"NWS alerts relevant to one hazard (optionally one borough), each tagged with its severity.",js/models/hazards.js:27,5,Exported: used in other files too.
+function,reportsNear,,Counts 311 reports within 1 km of a point.,js/models/hazards.js:37,2,Exported: used in other files too.
+function,assessPlace,,Score one neighborhood-like place for one hazard.,js/models/hazards.js:43,9,Exported: used in other files too.
+function,assessAll,,Scores all 39 neighborhoods for one hazard.,js/models/hazards.js:89,5,Exported: used in other files too. Tests use it.
+function,hasData,,Has this hazard got the data it needs to say anything at all?,js/models/hazards.js:94,7,Exported: used in other files too.
+constant,DRIVER_TEXT,,"Plain words for what is driving the risk (""heavy rain"", ""heat and humidity""…).",js/models/hazards.js:108,2,
+function,citySummary,,"Citywide picture for the hero band: worst place, level counts, a headline sentence and four KPI tiles ({ label, value, unit, note }).",js/models/hazards.js:123,4,Exported: used in other files too. Tests use it.
+function,levelWord,,Level id → lowercase word for sentences.,js/models/hazards.js:153,6,
+function,listText,,"Joins words as ""a, b and c"".",js/models/hazards.js:157,2,
+function,nearestAreaIndex,,Index of the AREAS entry nearest a point.,js/models/hazards.js:234,4,Exported: used in other files too.
+function,heatIndexF,,NWS heat index (°F) from air temperature (°F) and relative humidity (%).,js/models/heat-risk.js:15,5,Exported: used in other files too. Tests use it.
+function,heatHazard,,0–4 heat hazard from the peak heat index (°F).,js/models/heat-risk.js:40,3,Exported: used in other files too. Tests use it.
+function,warmNightBoost,,Bodies recover overnight only if it cools down.,js/models/heat-risk.js:50,2,Exported: used in other files too. Tests use it.
+function,vulnerabilityFactor,,HVI 1 → ×0.55 … HVI 4 → ×1.0 … HVI 5 → ×1.15,js/models/heat-risk.js:58,4,Exported: used in other files too. Tests use it.
+function,classifyHeatAlert,,"{ severity } for heat-related NWS alerts, otherwise null.",js/models/heat-risk.js:63,3,Exported: used in other files too. Tests use it.
+constant,ALERT_WEIGHT,,"How many points each alert severity adds to the score (warning 1.5, watch 0.75…).",js/models/heat-risk.js:69,6,
+function,assessHeat,,"input: { hvi, maxHeatIndex, maxTemp, overnightLow, alerts: [{ event, severity }] }",js/models/heat-risk.js:74,3,Exported: used in other files too. Tests use it.
+function,round1,,Rounds to 1 decimal.,js/models/heat-risk.js:95,3,
+function,f0,,Formats a number with no decimals.,js/models/heat-risk.js:98,10,"Very short name: rename by hand, not find-and-replace."
+constant,LEVELS,,Pure flood-risk scoring.,js/models/risk.js:7,11,Exported: used in other files too.
+constant,M_TO_FT,,Feet in a meter (3.28084).,js/models/risk.js:14,3,
+function,thresholdsFromGreatDiurnalRange,,"NOAA derived high-tide flooding thresholds, in feet above MHHW (Sweet et al.",js/models/risk.js:20,5,Exported: used in other files too. Tests use it.
+function,coastalHazard,,0–4 coastal hazard from peak water level (ft above MHHW).,js/models/risk.js:31,2,Exported: used in other files too. Tests use it.
+function,rainfallHazard,,0–4 stormwater hazard from the max forecast hourly rainfall (in/hr).,js/models/risk.js:46,2,Exported: used in other files too. Tests use it.
+function,alertSeverity,,NWS product tier from an event name: emergency > warning > watch / advisory > statement.,js/models/risk.js:61,8,Exported: used in other files too. Tests use it.
+function,classifyAlert,,"Sort an NWS alert event name into { kind, severity }, or null if it isn't flood related.",js/models/risk.js:70,3,Exported: used in other files too. Tests use it.
+constant,ALERT_WEIGHT,,"How many points each alert severity adds to the score (warning 1.5, watch 0.75…).",js/models/risk.js:78,6,
+function,alertBoost,,The biggest alert boost for one kind of flooding.,js/models/risk.js:80,3,Exported: used in other files too.
+function,complaintBoost,,Recent 311 street-flooding / sewer-backup reports nearby mean flooding is already happening.,js/models/risk.js:85,2,Exported: used in other files too.
+function,levelFor,,Score 0–4 → level id (low / elevated / high / severe).,js/models/risk.js:92,8,Exported: used in other files too. Tests use it.
+function,levelLabel,,"Level id → display word (Low, Elevated…).",js/models/risk.js:98,7,Exported: used in other files too.
+function,clamp,,Keeps a number between a min and max.,js/models/risk.js:102,23,Exported: used in other files too.
+function,round2,,Rounds a number to 2 decimals.,js/models/risk.js:106,15,Exported: used in other files too.
+function,assess,,Combine everything into one assessment.,js/models/risk.js:115,3,Exported: used in other files too. Tests use it.
+function,peakWaterLevel,,"Highest predicted tide plus the current storm surge (observed − predicted), if positive.",js/models/risk.js:146,3,Exported: used in other files too. Tests use it.
+function,distanceKm,,Great-circle distance in km.,js/models/risk.js:154,5,Exported: used in other files too.
+function,exposureFromFemaZone,,FEMA flood zone → coastal exposure (0–3).,js/models/risk.js:164,3,Exported: used in other files too. Tests use it.
+function,exposureFromComplaintHistory,,A year of 311 flooding reports within 500 m → stormwater exposure (1–3).,js/models/risk.js:173,3,Exported: used in other files too.
+function,fmt,,"Formats a number with 2 decimals, or ""?"" if missing.",js/models/risk.js:180,8,
+constant,ALL_BOROUGHS,,The five borough names.,js/models/scenarios.js:16,2,
+constant,HOUR,,Milliseconds in an hour.,js/models/scenarios.js:17,7,
+constant,SCENARIOS,,"The 5 replays: Sandy, Ida, 2019 heat wave, 2023 smoke, Isaias, with dates and summaries.",js/models/scenarios.js:19,3,Exported: used in other files too. Tests use it.
+function,scenarioById,,Finds a replay by its id.,js/models/scenarios.js:77,11,Exported: used in other files too.
+function,scenariosFor,,The replays that apply to one hazard.,js/models/scenarios.js:81,5,Exported: used in other files too. Tests use it.
+constant,SEA_LEVEL_STOPS,,"Slider stops: today plus the middle of the NPCC ""likely"" range for each period.",js/models/scenarios.js:88,8,Exported: used in other files too. Tests use it.
+constant,SLR_MAX_INCHES,,The Time Machine slider runs to the NPCC high-end estimate for 2100.,js/models/scenarios.js:99,5,Exported: used in other files too. Tests use it.
+function,seaLevelStopFor,,"The named stop at exactly this many inches, if any.",js/models/scenarios.js:102,5,Exported: used in other files too. Tests use it.
+function,seaLevelPeriod,,"The earliest period (""2080s"") whose likely range includes this rise, or null.",js/models/scenarios.js:107,3,Exported: used in other files too. Tests use it.
+function,periodName,,"""2080s"" → ""the 2080s"" for sentences.",js/models/scenarios.js:113,3,
+function,seaLevelNote,,One plain sentence placing a rise against the NYC Panel on Climate Change projections.,js/models/scenarios.js:116,3,Exported: used in other files too. Tests use it.
+function,withSeaLevelRise,,"Raise every water level (observed, predicted and peak) by `inches` of sea level rise.",js/models/scenarios.js:128,3,Exported: used in other files too. Tests use it.
+function,parseKey,,"""2012-10-29T12:00"" → milliseconds.",js/models/scenarios.js:146,7,
+function,fmtKey,,"Milliseconds → ""2012-10-29T12:00"" time key.",js/models/scenarios.js:153,5,
+function,bump,,"A bell curve: 1 at the center hour, fading to 0. Used to shape storm peaks.",js/models/scenarios.js:159,12,
+function,relativeHumidity,,"Relative humidity (%) from temperature and dew point (°F), Magnus formula.",js/models/scenarios.js:162,2,Exported: used in other files too. Tests use it.
+constant,WIND_FACTOR,,How much of the peak gust each wind exposure level gets in replays.,js/models/scenarios.js:168,3,
+function,isOceanFront,,True for neighborhoods on the open ocean.,js/models/scenarios.js:169,2,
+function,buildWeather,,"24 h of history plus 48 h ahead, generated hour by hour for every neighborhood.",js/models/scenarios.js:172,2,
+function,buildAir,,48 h of air quality: PM2.5 in µg/m³ (converted to AQI with the EPA formula) and an ozone AQI.,js/models/scenarios.js:191,2,
+function,waterLevelFn,,"Water level (ft above MHHW) at one tide gauge, h hours after the replay's start: an astronomical tide (a simple semidiurnal curve) plus a storm surge hump that peaks at `peakFt` ab",js/models/scenarios.js:208,3,
+function,buildTides,,"Every 30 minutes for 48 h at each tide gauge, shaped like fetchTides() output.",js/models/scenarios.js:217,2,
+function,alert,,Makes a fake NWS alert for a replay.,js/models/scenarios.js:240,18,
+function,throughExtremes,,"Cosine-eased curve through [hour, value] turning points, e.g.",js/models/scenarios.js:243,2,
+constant,SPECS,,Each spec gives hour-by-hour generators; h counts hours from the scenario's `now` (negative = before it).,js/models/scenarios.js:264,3,
+function,CLEAN_PM25,,Normal clean-air smoke level used in replays.,js/models/scenarios.js:345,3,
+function,BACKGROUND_OZONE,,Normal ozone level used in replays.,js/models/scenarios.js:346,3,
+function,tideParams,,Turns a replay's tide description into settings for each station.,js/models/scenarios.js:348,3,
+function,scenarioHourly,,"Hour-by-hour values for every neighborhood over any window of a replay, for the 3D story: heat index, temperature, rain, gusts, AQI and the water level at each tide gauge (ft above",js/models/scenarios.js:358,3,Exported: used in other files too.
+function,buildScenario,,"Inputs for a replay, shaped exactly like the live inputs app.js assembles.",js/models/scenarios.js:388,6,Exported: used in other files too. Tests use it.
+constant,WIND_THRESHOLDS,,"NWS gust limits: advisory 46, warning 58, hurricane force 74 mph.",js/models/storm-risk.js:11,11,Exported: used in other files too.
+function,windHazard,,0–4 hazard from the peak gust and sustained wind (mph).,js/models/storm-risk.js:18,2,Exported: used in other files too. Tests use it.
+function,thunderHazard,,WMO weather codes 95 (thunderstorm) and 96 / 99 (thunderstorm with hail).,js/models/storm-risk.js:35,2,Exported: used in other files too. Tests use it.
+function,exposureFactor,,"1 sheltered → ×0.8, 2 → ×1.0, 3 exposed shoreline → ×1.2",js/models/storm-risk.js:43,2,Exported: used in other files too.
+constant,WIND_ALERT,,Regex: alert names about wind.,js/models/storm-risk.js:47,2,
+function,classifyWindAlert,,"{ severity } for wind and storm NWS alerts, otherwise null.",js/models/storm-risk.js:50,3,Exported: used in other files too. Tests use it.
+constant,ALERT_WEIGHT,,"How many points each alert severity adds to the score (warning 1.5, watch 0.75…).",js/models/storm-risk.js:57,6,
+function,assessStorm,,"input: { windExposure, maxGust, maxSustained, weatherCodes, alerts: [{ event, severity }] }",js/models/storm-risk.js:62,3,Exported: used in other files too. Tests use it.
+function,f0,,Formats a number with no decimals.,js/models/storm-risk.js:84,10,"Very short name: rename by hand, not find-and-replace."
+constant,FT_PER_M,,Feet in a meter.,js/models/terrain.js:18,3,Exported: used in other files too.
+constant,KM_PER_DEG_LAT,,Kilometers per degree of latitude.,js/models/terrain.js:19,2,
+constant,KM_PER_DEG_LON_EQ,,Kilometers per degree of longitude at the equator.,js/models/terrain.js:20,2,
+constant,RAD,,Multiply degrees by this to get radians.,js/models/terrain.js:21,6,
+constant,HIGHER_GROUND_M,,"""Higher ground"": at least 6 m (about 20 ft) above sea level.",js/models/terrain.js:28,5,Exported: used in other files too.
+function,gridFromPixels,,"Decode the heightmap's RGBA pixels into a grid: elev[k] metres NAVD88, nta[k] = index into data/nyc-ntas.geojson, or -1 for water / outside the city.",js/models/terrain.js:34,2,Exported: used in other files too. Tests use it.
+function,gridPos,,"Fractional grid position of a point (row 0 is the north edge), or null outside the heightmap.",js/models/terrain.js:48,2,
+function,cellCenter,,Lat/lon of the center of one elevation grid cell.,js/models/terrain.js:57,2,Exported: used in other files too.
+function,bearingDeg,,"Compass bearing from point 1 to point 2, degrees clockwise from north.",js/models/terrain.js:66,2,Exported: used in other files too.
+function,compassWord,,"Degrees → ""north"", ""southeast""…",js/models/terrain.js:72,2,Exported: used in other files too. Tests use it.
+function,elevationAt,,"Ground elevation at a point (bilinear between land cells), with the NTA index of the nearest land cell.",js/models/terrain.js:80,4,Exported: used in other files too. Tests use it.
+function,findHigherGround,,"The nearest spot of solid higher ground: a land cell at least `minM` high whose eight neighbors are land and nearly as high, so a single bump or bridge ramp never counts.",js/models/terrain.js:116,3,Exported: used in other files too. Tests use it.
+function,floodStats,,Land below two water levels (metres NAVD88): `baseM` (the storm without extra sea level rise) and `waterM` (with it).,js/models/terrain.js:148,3,Exported: used in other files too. Tests use it.
+function,floodByNta,,"Per-NTA cell counts in one pass: land cells, cells under `baseM`, and cells only `waterM` reaches.",js/models/terrain.js:164,3,Exported: used in other files too. Tests use it.
+function,ntaElevation,,Median elevation of a set of NTAs and the share of their land below `waterM`.,js/models/terrain.js:181,4,Exported: used in other files too. Tests use it.
+function,mercY,,Latitude → Mercator map y.,js/models/terrain.js:195,3,
+function,invMercY,,Mercator map y → latitude.,js/models/terrain.js:196,2,
+function,floodRaster,,"RGBA pixels for the flooded-land map layer, resampled to Web Mercator rows so Leaflet can stretch it over the heightmap's bounds without drifting.",js/models/terrain.js:204,4,Exported: used in other files too. Tests use it.
+constant,loading,,The elevation PNG load in progress (so it only loads once).,js/models/terrain.js:224,17,
+function,loadTerrain,,Decode data/nyc-elevation.png once.,js/models/terrain.js:227,6,Exported: used in other files too.
+function,esc,,Makes text safe to put inside HTML (turns < into &lt; …).,js/page/charts.js:7,111,
+constant,WEEKDAY,,"Day names, for chart and story labels.",js/page/charts.js:11,4,
+constant,OSM_ATTRIBUTION,,"Free, keyless basemaps.",js/page/map.js:16,3,
+constant,BASEMAPS,,"The two free map tile servers: OpenStreetMap, and a backup.",js/page/map.js:17,3,
+constant,FALLBACK_AFTER_ERRORS,,Switch to the backup map after this many failed tiles.,js/page/map.js:24,2,
+constant,map,,The Leaflet map object.,js/page/map.js:27,209,
+constant,basemap,,The background tile layer.,js/page/map.js:28,7,
+constant,femaLayer,,The FEMA flood zone map layer.,js/page/map.js:29,3,
+constant,floodImage,,The flooded-land picture drawn over the map.,js/page/map.js:30,6,
+constant,floodKey,,"Remembers which flooded-land picture is showing, to skip redrawing it.",js/page/map.js:31,3,
+constant,layers,,"All the map layer groups, by name.",js/page/map.js:32,41,
+function,onPick,,What to do when someone clicks the map.,js/page/map.js:34,3,
+function,addBasemap,,"Adds a tile server to the map, switching to the backup if it fails.",js/page/map.js:36,3,
+function,createMap,,Creates the Leaflet map and all its layers.,js/page/map.js:52,2,Exported: used in other files too.
+function,fitCity,,Frame all five boroughs (call again if the map's box changes size).,js/page/map.js:100,4,Exported: used in other files too.
+function,invalidate,,Tells Leaflet the map box changed size.,js/page/map.js:129,2,Exported: used in other files too.
+function,makeFemaLayer,,"FEMA flood zones, drawn by FEMA's own map server as transparent image tiles.",js/page/map.js:134,2,
+function,drawFlood,,"Land under water. `key` names the water levels and colors; makeRaster() returns terrain.floodRaster()'s { width, height, data, bounds } and only runs when the key changes.",js/page/map.js:163,2,Exported: used in other files too.
+constant,OVERLAYS,,"The flood-only overlays, switched by the checkboxes on the map.",js/page/map.js:179,4,Exported: used in other files too.
+function,setOverlay,,Turns one map layer on or off.,js/page/map.js:186,2,Exported: used in other files too.
+function,drawReports,,Draws 311 flooding reports as dots.,js/page/map.js:192,2,Exported: used in other files too.
+function,drawStations,,Draws the tide gauge markers.,js/page/map.js:201,2,Exported: used in other files too.
+function,showPoint,,Puts the pin on the checked address.,js/page/map.js:215,2,Exported: used in other files too.
+function,showShape,,Draws the white block around the clicked or searched spot's neighborhood.,js/page/map.js,2,Exported: used in other files too.
+function,clearPoint,,Removes the address pin.,js/page/map.js:225,2,Exported: used in other files too.
+function,showRefuge,,"A dashed route from the checked address to the nearest higher ground, framed on the map.",js/page/map.js:230,2,Exported: used in other files too.
+function,showPair,,"Pins A and B on the two neighborhoods being compared, framed together.",js/page/map.js:250,2,Exported: used in other files too.
+function,clearPair,,Removes the two Compare markers.,js/page/map.js:267,1,Exported: used in other files too.
+function,openPopupAt,,Opens a popup at a point.,js/page/map.js:271,2,Exported: used in other files too.
+function,flyTo,,Smoothly moves the map to a point.,js/page/map.js:275,4,Exported: used in other files too.
+function,quiet,,"Wraps a muted message in <p class=""quiet"">.",js/page/panels.js:16,14,
+function,span,,"Live data covers the next 48 hours; a replay covers its own window, so it says nothing.",js/page/panels.js:18,121,
+function,block,,Wraps a title + body as one block of the forecast tab.,js/page/panels.js:20,36,
+function,worstIndex,,Position of the neighborhood with the biggest value.,js/page/panels.js:24,5,
+function,alertsBlock,,HTML for the NWS alerts list of one hazard.,js/page/panels.js:32,2,
+function,floodBlocks,,"HTML for the flood forecast tab (tides, rain, charts).",js/page/panels.js:47,2,
+function,heatBlocks,,HTML for the heat forecast tab.,js/page/panels.js:93,2,
+function,airBlocks,,HTML for the air quality forecast tab.,js/page/panels.js:119,2,
+function,windBlocks,,HTML for the wind forecast tab.,js/page/panels.js:145,2,
+constant,BLOCKS,,Which forecast-tab builder each hazard uses.,js/page/panels.js:173,2,
+function,detailsHtml,,"ctx: { hazard, inputs, status, selectedStation, isLive, pending }",js/page/panels.js:176,3,Exported: used in other files too.
+function,rankingRowsHtml,,HTML rows of the neighborhood ranking table.,js/page/panels.js:184,3,Exported: used in other files too.
+function,legendHtml,,flood: the flooded-land layer is on; slr: sea level rise is added on top.,js/page/panels.js:200,3,Exported: used in other files too.
+function,detailLines,,The key numbers shown in a neighborhood popup.,js/page/panels.js:211,2,
+function,areaPopupHtml,,HTML for a neighborhood popup on the map.,js/page/panels.js:219,3,Exported: used in other files too.
+function,stationPopupHtml,,HTML for a tide gauge popup.,js/page/panels.js:229,3,Exported: used in other files too.
+function,reportPinPopupHtml,,HTML for a 311 report popup.,js/page/panels.js:235,3,Exported: used in other files too.
+function,reportHtml,,"rep: { place, borough, nearest, loading, fema, history, stationName, results: { hazard: result }, available: { hazard: bool } }",js/page/panels.js:245,3,Exported: used in other files too.
+function,ft,,"Meters → ""12 ft"" text.",js/page/panels.js:293,56,"Very short name: rename by hand, not find-and-replace."
+function,miles,,"Kilometers → ""0.4 mi"" text.",js/page/panels.js:294,2,
+function,evacText,,Sentence about the address's evacuation zone.,js/page/panels.js:299,2,
+function,refugeHtml,,"rep.terrain: { here: { m } | null, higher: { km, direction, m, name } | null, sandyM, futureM, futureLabel } | null (still loading)",js/page/panels.js:312,2,
+function,timeMachineDeltaHtml,,"d: { inches, label, peakBefore, peakAfter, stationName, counts: { before, after }, changes: [{ name, from, to }], flood: { baseKm2, addedKm2 } | null, scenarioName }",js/page/panels.js:357,3,Exported: used in other files too.
+function,compareHtml,,"c: { a, b: { area, results: { hazard: result }, available, elev: { medianM, shareSandy, shareFuture } | null }, futureLabel }",js/page/panels.js:408,3,Exported: used in other files too.
+constant,STORE_KEY,,The name the checklist is saved under in localStorage.,js/page/sections.js:12,3,
+function,renderSeaLevel,,Draws the sea level rise chart.,js/page/sections.js:14,3,Exported: used in other files too.
+function,renderMethodology,,"Draws the ""how it works"" section.",js/page/sections.js:21,4,Exported: used in other files too.
+function,renderSources,,Draws the data sources list with live/failed status.,js/page/sections.js:30,6,Exported: used in other files too.
+function,renderStoryTable,,"Every number the 3D story shows, as a table (every third hour).",js/page/sections.js:41,4,Exported: used in other files too.
+function,loadChecked,,Reads the saved checklist ticks from the browser.,js/page/sections.js:55,2,
+function,saveChecked,,Saves checked checklist items in the browser.,js/page/sections.js:63,2,
+function,initChecklist,,Draws the Be ready checklist and remembers ticks.,js/page/sections.js:71,3,Exported: used in other files too.
+function,esc,,Makes text safe to put inside HTML (turns < into &lt; …).,js/page/ui.js:5,111,Exported: used in other files too.
+function,level,,"A risk level: a small square in the hazard's ramp plus the word, never color alone.",js/page/ui.js:10,159,Exported: used in other files too. Tests use it.
+function,fmtTime,,"""Tue 3:00 PM"" from an ISO or NOAA-style timestamp.",js/page/ui.js:16,7,Exported: used in other files too.
+function,exposureWord,,0–3 → Minimal / Low / Moderate / High.,js/page/ui.js:23,8,Exported: used in other files too.
+function,windExposureWord,,1–3 → Sheltered / Exposed / Very exposed.,js/page/ui.js:27,5,Exported: used in other files too.
+function,tideLevelText,,"""−3.3 ft vs. normal high tide"": a tide gauge reading with a real minus sign and its reference.",js/page/ui.js:32,5,Exported: used in other files too. Tests use it.
+function,$,,Shortcut for document.getElementById.,js/story/controller.js:17,777,"Very short name: rename by hand, not find-and-replace."
+function,createStoryController,,Creates the story player (everything in controller.js lives inside it).,js/story/controller.js:49,3,Exported: used in other files too.
+constant,ELEVATION,,Shared description of data/nyc-elevation.png (made by scripts/build/bake-elevation.mjs).,js/story/elevation.js:5,13,Exported: used in other files too.
+function,decodeElevation,,Red + green pixel values → meters of elevation.,js/story/elevation.js:11,5,Exported: used in other files too.
+constant,R,,"Small, dependency-free geometry helpers shared by the 3D stage, the map and the data scripts.",js/story/geo.js:4,8,"Very short name: rename by hand, not find-and-replace."
+constant,ORIGIN,,The point the 3D map is centered on.,js/story/geo.js:5,7,Exported: used in other files too.
+constant,K,,Scale factor so 1 unit ≈ 1 km near NYC.,js/story/geo.js:6,5,"Very short name: rename by hand, not find-and-replace."
+function,rad,,Degrees → radians.,js/story/geo.js:7,12,
+function,merc,,Latitude → Mercator y.,js/story/geo.js:8,4,
+function,project,,"Mercator projection (the same math as d3.geoMercator), scaled so one unit is one kilometre near the city.",js/story/geo.js:14,12,Exported: used in other files too. Tests use it.
+function,unproject,,3D x/y (km) → lon/lat.,js/story/geo.js:18,3,Exported: used in other files too. Tests use it.
+function,inRing,,Ray-casting point-in-ring test.,js/story/geo.js:26,3,Exported: used in other files too.
+function,inGeometry,,"Polygon / MultiPolygon containment, honoring holes.",js/story/geo.js:37,1,Exported: used in other files too. Tests use it.
+function,centroid,,Area-weighted centroid of the outer rings of a Polygon or MultiPolygon.,js/story/geo.js:50,2,Exported: used in other files too. Tests use it.
+function,kmBetween,,Distance in km between two lon/lat points (fine for city scale).,js/story/geo.js:69,6,Exported: used in other files too. Tests use it.
+constant,MHHW_NAVD_M,,"Mean higher high water at the Battery is about 2.2 ft (0.68 m) above NAVD88, the datum of the elevation data.",js/story/stories.js:13,2,Exported: used in other files too.
+constant,FT,,Meters in a foot.,js/story/stories.js:14,2,"Exported: used in other files too. Very short name: rename by hand, not find-and-replace."
+constant,WEEKDAY,,"Day names, for chart and story labels.",js/story/stories.js:16,4,
+function,storyTime,,"""Friday, 3 p.m."" from ""2019-07-19T15:00"" (AP style).",js/story/stories.js:19,8,Exported: used in other files too. Tests use it.
+function,r0,,Rounds to a whole number.,js/story/stories.js:26,12,"Very short name: rename by hand, not find-and-replace."
+function,r1,,"Rounds to 1 decimal, as text.",js/story/stories.js:27,7,"Very short name: rename by hand, not find-and-replace."
+constant,STORIES,,"The four stories: replay, hours, text beats, neighborhoods to visit.",js/story/stories.js:29,2,Exported: used in other files too. Tests use it.
+function,areaIndex,,Position of a neighborhood id in AREAS.,js/story/stories.js:183,2,
+function,areaMetric,,Value of a story's metric for one neighborhood across the window.,js/story/stories.js:186,2,
+function,driversFor,,"The 1–2 facts each annotation shows next to the risk level, from the story's own hours.",js/story/stories.js:192,2,
+function,buildStory,,Everything the page needs to tell one hazard's story.,js/story/stories.js:222,5,Exported: used in other files too. Tests use it.
+constant,BEAT_HOURS,,A beat stays on screen until the clock is more than this many hours past it.,js/story/stories.js:334,3,Exported: used in other files too.
+function,beatAt,,"Which beat's text to show at a story hour (−1 for none): the latest beat the clock has reached, but only while the clock is within BEAT_HOURS of it, so the text never describes a d",js/story/stories.js:342,3,Exported: used in other files too. Tests use it.
+function,waterNavdMeters,,"Water level at the Battery (ft above MHHW) → metres NAVD88, the elevation data's datum.",js/story/stories.js:379,10,Exported: used in other files too. Tests use it.
+html id,compare-button,,Compare button (masthead),index.html:40,2,Also used in JS.
+html id,story-button,,3D story button (masthead),index.html:42,5,Also used in JS.
+html id,theme-toggle,,Dark/Light button,index.html:43,6,Also used in JS.
+html id,dashboard,,The main dashboard grid,index.html:47,89,Also used in JS. Also a link target (#top).
+html id,now-label,,"Small label above the big number (""Right now · Floods"")",index.html:50,2,Also used in JS.
+html id,now-number,,The big headline number,index.html:52,2,Also used in JS.
+html id,now-number-label,,Words under the big number,index.html:53,2,Also used in JS.
+html id,now-headline,,"Headline (""High flood risk in 1 neighborhood"")",index.html:55,3,Also used in JS.
+html id,now-summary,,Sentence under the headline,index.html:56,2,Also used in JS.
+html id,now-replay-note,,Replay summary line,index.html:57,2,Also used in JS.
+html id,now-other-hazards,,"""Also right now: High heat risk"" line",index.html:58,3,Also used in JS.
+html id,story-teaser,,The 3D story teaser button in the Right now card,index.html:59,6,Also used in JS.
+html id,story-teaser-label,,Teaser label,index.html:60,2,Also used in JS.
+html id,story-teaser-number,,Teaser big number,index.html:61,5,Also used in JS.
+html id,story-teaser-headline,,Teaser headline,index.html:62,4,Also used in JS.
+html id,address-card,,The Check an address card,index.html:68,23,Also used in JS. Tests use it. Also a link target (#check).
+html id,address-form,,The address search form,index.html:69,2,Also used in JS.
+html id,address-card-title,,"""Check an address"" label",index.html:70,2,Also used in JS.
+html id,address-input,,The address text box,index.html:73,3,Also used in JS. Tests use it.
+html id,address-results,,Address suggestions list,index.html:76,11,Also used in JS.
+html id,address-report,,The address report card,index.html:79,14,Also used in JS.
+html id,map,,The Leaflet map box,index.html:86,209,Also used in JS.
+html id,tm-badge,,Badge on the map showing replay / sea level,index.html:88,7,Also used in JS.
+html id,layers-box,,Map layers drop-down,index.html:89,8,Also used in JS.
+html id,layers,,Map layer checkboxes,index.html:91,41,Also used in JS.
+html id,legend,,Map color legend,index.html:96,15,Also used in JS.
+html id,time-machine,,The Climate Time Machine card,index.html:101,2,Also used in JS.
+html id,tm-title,,Time Machine title,index.html:103,2,Also used in JS.
+html id,mode-label,,"""Conditions"" label",index.html:107,2,Also used in JS.
+html id,mode-list,,Live / replay buttons,index.html:108,11,Also used in JS.
+html id,slr,,Sea level rise slider area,index.html:110,62,Also used in JS.
+html id,slr-out,,"Slider value (""+29 in"")",index.html:113,5,Also used in JS.
+html id,slr-range,,The sea level slider,index.html:115,11,Also used in JS.
+html id,slr-stops,,2050s / 2080s / 2100 buttons,index.html:116,8,Also used in JS.
+html id,slr-note,,Note under the slider,index.html:117,2,Also used in JS.
+html id,tm-delta,,"""What changed"" card",index.html:119,7,Also used in JS.
+html id,explore,,The tabs card,index.html:123,2,Also used in JS.
+html id,explore-tabs,,The tab buttons row,index.html:124,5,Also used in JS.
+html id,tab-ranking,,Neighborhoods tab button,index.html:125,2,Also used in JS.
+html id,tab-forecast,,Forecast & alerts tab button,index.html:126,2,Also used in JS.
+html id,tab-ready,,Be ready tab button,index.html:127,2,Also used in JS.
+html id,panel-ranking,,Neighborhoods tab content,index.html:130,2,Also used in JS.
+html id,ranking-note,,Note above the table,index.html:131,2,Also used in JS.
+html id,ranking,,The neighborhood ranking table,index.html:132,4,Also used in JS.
+html id,ranking-more,,"""Show all neighborhoods"" button",index.html:138,4,Also used in JS.
+html id,panel-forecast,,Forecast & alerts tab content,index.html:141,2,Also used in JS.
+html id,details,,Box filled with the forecast blocks and charts,index.html:142,21,Also used in JS.
+html id,panel-ready,,Be ready tab content,index.html:145,2,Also used in JS.
+html id,prep-progress,,"""3 of 12 done"" line",index.html:147,2,Also used in JS.
+html id,prep-tabs,,Checklist hazard buttons,index.html:148,2,Also used in JS.
+html id,checklist,,The checklist items,index.html:149,11,Also used in JS.
+html id,method,,The How it works section,index.html:154,4,Also used in JS.
+html id,method-title,,How it works title,index.html:157,2,Also used in JS.
+html id,methodology,,Per-hazard methodology text,index.html:167,4,Also used in JS.
+html id,slr-body,,Rows of the sea level rise table,index.html:178,2,Also used in JS.
+html id,sources,,Data sources list,index.html:185,11,Also used in JS.
+html id,story-table,,Hour-by-hour story table,index.html:188,2,Also used in JS.
+html id,story,,The full-screen 3D story overlay,index.html:206,205,Also used in JS.
+html id,sky,,Sky gradient behind the 3D city,index.html:207,10,Also used in JS.
+html id,stage,,The canvas Three.js draws on,index.html:208,42,Also used in JS.
+html id,annotation,,"Floating note in the ""Who's exposed"" chapter",index.html:210,17,Also used in JS.
+html id,story-side,,The story's text column,index.html:212,8,Also used in JS.
+html id,story-title,,"""The story in 3D"" label",index.html:214,2,Also used in JS.
+html id,story-close,,Close ✕ button,index.html:215,7,Also used in JS.
+html id,timeline-kicker,,Timeline label,index.html:223,2,Also used in JS.
+html id,timeline-title,,Timeline headline,index.html:224,2,Also used in JS.
+html id,timeline-dek,,Timeline intro sentence,index.html:225,2,Also used in JS.
+html id,clock-time,,"The replay clock (""Monday, 6 a.m."")",index.html:226,3,Also used in JS.
+html id,readout-num,,Big story number,index.html:227,4,Also used in JS.
+html id,readout-unit,,Its unit,index.html:227,4,Also used in JS.
+html id,beats,,The story sentences that appear hour by hour,index.html:228,26,Also used in JS.
+html id,timeline-note,,"Small ""modeled from…"" note",index.html:234,2,Also used in JS.
+html id,exposed-kicker,,"""Who's exposed"" label",index.html:238,2,Also used in JS.
+html id,exposed-title,,"""Who's exposed"" headline",index.html:239,2,Also used in JS.
+html id,exposed-dek,,"""Who's exposed"" intro",index.html:240,2,Also used in JS.
+html id,stops,,"Neighborhoods visited in ""Who's exposed""",index.html:241,32,Also used in JS.
+html id,exposed-note,,Small note under it,index.html:242,2,Also used in JS.
+html id,story-prev,,Previous step button,index.html:246,2,Also used in JS.
+html id,story-play,,Play/Pause button,index.html:247,4,Also used in JS.
+html id,story-next,,Next step button,index.html:248,2,Also used in JS.
+html id,story-range,,Story scrubber slider,index.html:249,4,Also used in JS.
+html id,compare,,The Compare dialog,index.html:259,29,Also used in JS.
+html id,compare-mode,,"""Live now"" / replay label in Compare",index.html:263,2,Also used in JS.
+html id,compare-title,,Compare title,index.html:264,2,Also used in JS.
+html id,compare-a,,Neighborhood A picker,index.html:269,5,Also used in JS.
+html id,compare-swap,,⇄ swap button,index.html:270,2,Also used in JS.
+html id,compare-b,,Neighborhood B picker,index.html:271,4,Also used in JS.
+html id,compare-presets,,Example pairs,index.html:273,6,Also used in JS.
+html id,compare-body,,The side-by-side comparison,index.html:274,5,Also used in JS.
+html id,compare-map,,"""Show both on the map"" button",index.html:276,2,Also used in JS.
+css class,left-side,,Left side (neighborhood A) in Compare,css/style.css,389,Common word: rename by hand.
+css class,orange-square,,Legend swatch: land flooded only by the extra sea level rise,css/style.css,20,
+css class,address-form,,The address search form,css/style.css,33,
+css class,address-results,,Suggestions under the address box (hidden until there are some),css/style.css,11,
+css class,address-row,,Text box + Check button row,css/style.css,2,
+css class,alerts,,List of NWS alerts,css/style.css,90,
+css class,other-hazards,,"""Also right now"" line",css/style.css,5,
+css class,annotation,,Floating note box in the 3D story,css/style.css,17,
+css class,arrow,,The → arrow between before/after numbers,css/style.css,4,
+css class,right-side,,Right side (neighborhood B) in Compare,css/style.css,212,Common word: rename by hand.
+css class,slate-square,,Legend swatch: land flooded at today's sea level,css/style.css,32,Common word: rename by hand.
+css class,beat,,"One story sentence (shown when it gets class ""on"")",css/style.css,36,
+css class,beats,,List of story sentences,css/style.css,26,
+css class,before,,"The ""before"" number (muted)",css/style.css,37,
+css class,btn,,Solid dark button,css/style.css,3,
+css class,card,,A white box on the right side of the dashboard,css/style.css,10,
+css class,card-head,,Title row of a card,css/style.css,3,
+css class,colored-top-border,,The Right now card (colored top border),css/style.css,3,
+css class,less-padding-top,,The tabs card,css/style.css,2,
+css class,card-title,,Small uppercase card title,css/style.css,7,
+css class,chapter,,A story chapter panel (hidden unless active),css/style.css,19,
+css class,chapter-exposed,,"""Who's exposed"" chapter",css/style.css,2,
+css class,chapter-tabs,,Timeline / Who's exposed tab row,css/style.css,6,
+css class,chapter-timeline,,Timeline chapter,css/style.css,2,
+css class,chart,,Box holding a chart,css/style.css,19,Common word: rename by hand.
+css class,check,,One checklist item row,css/style.css,23,Common word: rename by hand.
+css class,checklist,,The checklist,css/style.css,11,
+css class,pill-button,,Small rounded outline button (masthead),css/style.css,11,
+css class,dark-fill,,Filled dark chip (3D story button),css/style.css,3,
+css class,clock,,The story clock line,css/style.css,17,
+css class,cmp-bar,,Compare dialog: bar,css/style.css,7,
+css class,cmp-group,,Compare dialog: section heading,css/style.css,4,
+css class,cmp-label,,Compare dialog: middle label,css/style.css,3,
+css class,cmp-name,,Compare dialog: neighborhood name,css/style.css,6,
+css class,cmp-names,,Compare dialog: names row,css/style.css,4,
+css class,cmp-row,,Compare dialog: one comparison row,css/style.css,5,
+css class,cmp-rows,,Compare dialog: all rows,css/style.css,1,
+css class,cmp-side,,Compare dialog: one side,css/style.css,11,
+css class,cmp-tag,,Compare dialog: A/B badge,css/style.css,3,
+css class,cmp-val,,Compare dialog: value,css/style.css,4,
+css class,cmp-verdict,,Compare dialog: summary sentence,css/style.css,3,
+css class,compare,,Compare dialog,css/style.css,29,Common word: rename by hand.
+css class,compare-body,,Compare content,css/style.css,5,
+css class,compare-foot,,Bottom row of Compare,css/style.css,2,
+css class,compare-head,,Top row of Compare,css/style.css,3,
+css class,compare-inner,,Compare padding wrapper,css/style.css,3,
+css class,compare-pick,,A ⇄ B picker row,css/style.css,6,
+css class,compare-presets,,Example pairs row,css/style.css,6,
+css class,space-above,,Replay summary line,css/style.css,3,
+css class,story-teaser-play,,"""Play the story ▶"" text",css/style.css,2,
+css class,story-teaser-headline,,Teaser headline,css/style.css,4,
+css class,story-teaser-number,,Teaser big number,css/style.css,5,
+css class,dashboard,,"The whole dashboard grid (map left, cards right)",css/style.css,6,
+css class,dash-map,,The sticky map column,css/style.css,6,
+css class,intro-text,,Larger serif intro sentence,css/style.css,19,
+css class,delta-grid,,"3 stat boxes in ""what changed""",css/style.css,3,
+css class,delta-head,,"""What changed"" headline",css/style.css,2,
+css class,delta-list,,List of changed neighborhoods,css/style.css,7,
+css class,delta-nums,,Before → after numbers,css/style.css,5,
+css class,delta-stat,,One stat box,css/style.css,3,
+css class,forecast-panel,,Forecast tab content area,css/style.css,21,Common word: rename by hand.
+css class,disclaimer,,"""Not an official warning"" text",css/style.css,2,
+css class,facts,,Label/value list (dl) in reports,css/style.css,14,
+css class,flood-image,,The flooded-land picture on the map,css/style.css,3,
+css class,flood-key,,Small colored square in the flood legend,css/style.css,7,
+css class,footer,,Page footer,css/style.css,6,
+css class,formula,,The risk formula shown in How it works,css/style.css,5,
+css class,gauge-mark,,Tide gauge marker label on the map,css/style.css,6,
+css class,serif-heading,,Big serif heading style,css/style.css,21,
+css class,h3,,Small uppercase heading style,css/style.css,19,
+css class,here,,Highlighted table row (this neighborhood),css/style.css,28,Common word: rename by hand.
+css class,smaller-text,,Small hint text,css/style.css,2,
+css class,is-worse,,Compare: the worse side is bold,css/style.css,3,
+css class,small-label,,Small uppercase label text,css/style.css,176,Common word: rename by hand.
+css class,layers,,Map layer checkbox list,css/style.css,41,Common word: rename by hand.
+css class,layers-box,,Map layers drop-down,css/style.css,8,
+css class,legend-break,,Line break inside the map legend,css/style.css,3,
+css class,level,,A risk level word + colored square,css/style.css,159,Common word: rename by hand.
+css class,link-btn,,Button that looks like a link,css/style.css,4,
+css class,lv,,Small uppercase level text,css/style.css,4,
+css class,lvl-elevated,,Sets --lvl to the Elevated color,css/style.css,1,Built in code from the level ids (lvl-${level}): rename together with LEVELS in risk.js.
+css class,lvl-high,,Sets --lvl to the High color,css/style.css,1,Built in code from the level ids (lvl-${level}): rename together with LEVELS in risk.js.
+css class,lvl-low,,Sets the color variable --lvl to the Low color (built in code as lvl-${level}),css/style.css,1,Built in code from the level ids (lvl-${level}): rename together with LEVELS in risk.js.
+css class,lvl-none,,No level color (not rated),css/style.css,2,Built in code from the level ids (lvl-${level}): rename together with LEVELS in risk.js.
+css class,lvl-severe,,Sets --lvl to the Severe color,css/style.css,1,Built in code from the level ids (lvl-${level}): rename together with LEVELS in risk.js.
+css class,map,,The map box,css/style.css,209,Common word: rename by hand.
+css class,floating,,Box floating on top of the map,css/style.css,6,
+css class,map-legend,,Map legend,css/style.css,7,
+css class,map-shell,,Frame around the map,css/style.css,4,
+css class,map-stack,,"Stack of floating boxes, top left of the map",css/style.css,3,
+css class,top-bar-buttons,,Masthead buttons group,css/style.css,5,
+css class,top-bar,,The sticky top bar,css/style.css,6,
+css class,big-number,,Huge serif number,css/style.css,8,
+css class,huge-text,,Size of the Right now big number,css/style.css,2,
+css class,number-label,,Italic words beside the big number,css/style.css,3,
+css class,number-digits,,The number part,css/style.css,2,
+css class,number-unit,,"The unit part (ft, °F) in smaller type",css/style.css,3,
+css class,method,,How it works section,css/style.css,4,
+css class,method-card,,One card in How it works,css/style.css,4,
+css class,method-grid,,3-column grid in How it works,css/style.css,4,
+css class,method-intro,,How it works intro,css/style.css,4,
+css class,method-list,,Per-hazard methodology list,css/style.css,12,
+css class,mode-list,,Live / replay buttons,css/style.css,11,
+css class,modeled,,"Small ""modeled from"" note",css/style.css,8,
+css class,modes,,Live/replay area,css/style.css,3,
+css class,mono,,Monospace numbers,css/style.css,1,
+css class,more,,"""Show all"" text button",css/style.css,19,Common word: rename by hand.
+css class,name,,Neighborhood name cell in the table,css/style.css,148,Common word: rename by hand.
+css class,note,,Small grey note text,css/style.css,55,Common word: rename by hand.
+css class,number-row,,Big number + label row,css/style.css,3,
+css class,nta,,A neighborhood outline on the map,css/style.css,32,
+css class,num,,Monospace number,css/style.css,24,Common word: rename by hand.
+css class,on,,"""Active / visible"" state (story beats, stops)",css/style.css,109,Common word: rename by hand.
+css class,pair-mark,,A / B marker on the map in Compare,css/style.css,3,
+css class,pin-here,,The checked-address pin,css/style.css,2,
+css class,player,,Story player controls,css/style.css,2,
+css class,player-btn,,◀ ▶ buttons,css/style.css,5,
+css class,player-hint,,"""Use arrow keys"" hint",css/style.css,3,
+css class,player-range,,Story scrubber,css/style.css,6,
+css class,popup,,Map popup content,css/style.css,7,Common word: rename by hand.
+css class,prep-nav,,Checklist hazard buttons,css/style.css,6,
+css class,progress,,Checklist progress text,css/style.css,8,
+css class,quiet,,Muted message,css/style.css,14,
+css class,rated,,Map shape of one of the 39 rated neighborhoods (filled with its level color),css/style.css,19,
+css class,readout,,Big story number,css/style.css,3,
+css class,readout-num,,Story number,css/style.css,4,
+css class,readout-unit,,Story number unit,css/style.css,4,
+css class,refuge,,Safety quick-finder box (higher ground),css/style.css,6,
+css class,refuge-actions,,Show on map / walking route links,css/style.css,2,
+css class,refuge-line,,Dashed green route to higher ground on the map,css/style.css,2,
+css class,refuge-links,,City resource links,css/style.css,3,
+css class,refuge-list,,Safety facts list,css/style.css,6,
+css class,refuge-mark,,Higher ground marker on the map,css/style.css,3,
+css class,report,,Address report card,css/style.css,14,Common word: rename by hand.
+css class,report-body,,Address report content,css/style.css,2,
+css class,report-close,,Close report button,css/style.css,5,
+css class,report-dot,,311 report dot on the map,css/style.css,2,
+css class,report-title,,Address report title,css/style.css,3,
+css class,address-report-box,,Address report wrapper (hidden until a check),css/style.css,2,
+css class,row-link,,Neighborhood name button in the table,css/style.css,9,
+css class,hazard-menu,,Hazard links in the masthead,css/style.css,10,
+css class,skip-link,,"""Skip to the address check"" link (keyboard users)",css/style.css,3,
+css class,sky,,3D sky gradient,css/style.css,10,
+css class,slr,,Sea level slider area,css/style.css,62,
+css class,slr-out,,Slider value,css/style.css,5,
+css class,slr-stops,,Sea level step buttons,css/style.css,8,
+css class,slr-top,,Slider title row,css/style.css,2,
+css class,sources,,Data sources list,css/style.css,11,Common word: rename by hand.
+css class,sr-only,,Hidden on screen but read by screen readers,css/style.css,5,
+css class,st,,Small monospace status text,css/style.css,21,
+css class,stat-line,,Big serif stat line,css/style.css,7,
+css class,stops,,"""Who's exposed"" neighborhood list",css/style.css,32,
+css class,story,,Full-screen story overlay,css/style.css,205,Common word: rename by hand.
+css class,story-close,,Close ✕ button,css/style.css,7,
+css class,story-teaser,,Story teaser button,css/style.css,6,
+css class,story-data,,Hour-by-hour table drop-down,css/style.css,4,
+css class,story-open,,On <body> while the story is open (stops page scroll),css/style.css,5,
+css class,story-side,,Story text column,css/style.css,8,
+css class,story-top,,Story top row,css/style.css,2,
+css class,street-zoom,,Map is zoomed in to street level,css/style.css,3,
+css class,swap,,⇄ round button,css/style.css,5,
+css class,swatch,,Small color square,css/style.css,4,
+css class,tab-panel,,Content of one tab,css/style.css,5,
+css class,table,,Data table style,css/style.css,33,Common word: rename by hand.
+css class,tabs,,Tab button row,css/style.css,21,
+css class,theme-toggle,,Dark/Light button,css/style.css,6,
+css class,tiles-ok,,Map tiles loaded,css/style.css,2,
+css class,tm-delta,,"""What changed"" card (hidden until the slider moves)",css/style.css,7,
+css class,unrated,,Muted text for unrated places,css/style.css,3,
+css class,dashed-outline,,Legend swatch: neighborhood hit harder,css/style.css,33,Common word: rename by hand.
+css class,wet-added,,Bar part: extra flooded share,css/style.css,2,
+css class,wet-bar,,Flooded share bar,css/style.css,2,
+css class,wet-base,,Bar part: flooded today,css/style.css,2,
+css class,three-columns,,List of neighborhoods getting wetter,css/style.css,10,
+css class,why,,"""Why"" column in the table",css/style.css,5,
+css class,logo,,"""DrainWatch"" logo text",css/style.css,3,
+css class,worse,,Highlight on the worse value,css/style.css,15,
+css class,picked-area,,White block around the clicked or searched spot's neighborhood,css/style.css,2,
+data field,state.hazard,,"Which hazard tab is showing: floods, heat, air or wind",js/app.js,,
+data field,state.scenario,,'live' or a replay id like 'sandy',js/app.js,,
+data field,state.slrInches,,"Extra sea level from the Time Machine slider, in inches",js/app.js,,
+data field,state.live,,"The latest live data: tides, weather, air, alerts, reports",js/app.js,,
+data field,state.liveLoaded,,True once live data has arrived at least once,js/app.js,,
+data field,state.loading,,True while live data is loading (stops double loads),js/app.js,,
+data field,state.status,,"Per data source: did it work? ({ok, message})",js/app.js,,
+data field,state.selectedStation,,Which tide gauge the forecast tab shows,js/app.js,,
+data field,state.point,,The checked address and everything looked up for it,js/app.js,,
+data field,state.overlays,,Which map layers are switched on,js/app.js,,
+data field,state.heatDrivers,,Optional tree canopy / AC data (usually null),js/app.js,,
+data field,state.showAll,,Show all 39 neighborhoods in the table instead of the top 10,js/app.js,,
+data field,state.compare,,"The two neighborhood ids in Compare ({a, b})",js/app.js,,
+data field,AREAS[].id,,"Short id like 'red-hook' (used in URLs, data/nyc-ntas.geojson and Compare)",js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].name,,Display name,js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].borough,,Borough name (must match NWS alert borough names in BOROUGH_SAME),js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].lat / lon,,Location (sent to the weather APIs),js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].coastalExposure,,0–3: how much the ocean can flood it,js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].stormwaterExposure,,0–3: how much heavy rain floods it,js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].hvi,,1–5: NYC Heat Vulnerability Index,js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].asthma,,1–5: asthma burden,js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].windExposure,,1–3: shelter from wind,js/facts/config.js,,Careful: used in many places.
+data field,AREAS[].station,,Which tide gauge it uses (a key of TIDE_STATIONS),js/facts/config.js,,Careful: used in many places.

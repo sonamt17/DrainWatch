@@ -1,0 +1,7 @@
+nyc-ntas.geojson
+Source: https://raw.githubusercontent.com/nycehs/NYC_geography/master/NTA.geo.json (NYC Health Department)
+Made by: scripts/build/build-geodata.mjs
+
+nyc-elevation.png
+Source: https://registry.opendata.aws/terrain-tiles/ (AWS Terrain Tiles, from USGS elevation data)
+Made by: scripts/build/bake-elevation.mjs
